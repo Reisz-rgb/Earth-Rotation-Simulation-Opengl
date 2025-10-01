@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/main.dir/main.cpp.o CMakeFiles/main.dir/shader.cpp.o CMakeFiles/main.dir/geometry.cpp.o CMakeFiles/main.dir/input.cpp.o -o bin/main  _deps/glfw-build/src/libglfw3.a _deps/glad-build/libglad.a /usr/lib/x86_64-linux-gnu/libGL.so /usr/lib/x86_64-linux-gnu/librt.a -lm -ldl 

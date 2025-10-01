@@ -1,0 +1,3 @@
+/mnt/d/Project_Opengl/SL/build/_deps/glad-subbuild/CMakeFiles/glad-populate.dir
+/mnt/d/Project_Opengl/SL/build/_deps/glad-subbuild/CMakeFiles/edit_cache.dir
+/mnt/d/Project_Opengl/SL/build/_deps/glad-subbuild/CMakeFiles/rebuild_cache.dir
