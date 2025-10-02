@@ -1,3 +1,5 @@
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
@@ -54,15 +56,20 @@ int main() {
     createSphere(1.0f, 36, 18);
     
     unsigned int planetShaderProgram = createShaderProgram(); 
-    unsigned int orbitShaderProgram = createSimpleShaderProgram(); // <-- NEW SHADER
+    unsigned int orbitShaderProgram = createSimpleShaderProgram(); 
+
+    stbi_set_flip_vertically_on_load(true);
+    unsigned int sunTexture = loadTexture("textures/sun.jpg");     
+    unsigned int earthTexture = loadTexture("textures/earth.jpg"); 
+    unsigned int moonTexture = loadTexture("textures/moon.jpg");   
     
     // Create sphere geometry
     createSphere(1.0f, 36, 18);
     
-    // Create orbit rings (Earth radius: 16.0f, Moon radius: 2.5f)
+    // Create orbit rings 
     const int ORBIT_SEGMENTS = 100;
-    createOrbitRing(earthOrbitRing, 16.0f, ORBIT_SEGMENTS); // <-- NEW GEOMETRY
-    createOrbitRing(moonOrbitRing, 2.5f, ORBIT_SEGMENTS);   // <-- NEW GEOMETRY
+    createOrbitRing(earthOrbitRing, 16.0f, ORBIT_SEGMENTS); 
+    createOrbitRing(moonOrbitRing, 2.5f, ORBIT_SEGMENTS);  
 
     
     std::cout << "=== Simulator ===" << std::endl;
@@ -76,7 +83,7 @@ int main() {
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
-        timeElapsed += deltaTime * 0.5f; // Slower speed factor
+        timeElapsed += deltaTime * 0.5f; 
         
         processInput(window); 
         
@@ -99,7 +106,7 @@ int main() {
         glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
         glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
         glUniform3fv(glGetUniformLocation(shaderProgram, "viewPos"), 1, glm::value_ptr(cameraPos));
-        glUniform3f(glGetUniformLocation(shaderProgram, "lightPos"), 0.0f, 0.0f, 0.0f); // Light at the center (Sun)
+        glUniform3f(glGetUniformLocation(shaderProgram, "lightPos"), 0.0f, 0.0f, 0.0f); 
         
         // Bind Sphere VAO once for all draw calls
         glBindVertexArray(sphere.VAO);
@@ -108,7 +115,7 @@ int main() {
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::rotate(model, timeElapsed * 0.5f, glm::vec3(0.0f, 1.0f, 0.0f));
         model = glm::scale(model, glm::vec3(2.5f));
-        drawPlanet(shaderProgram, model, glm::vec3(1.0f, 0.9f, 0.0f), 1.5f); // High emission
+        drawPlanet(shaderProgram, model, sunTexture, 1.5f); // High emission
         
         // Earth Orbit
         glm::mat4 earthOrbit = glm::mat4(1.0f);
@@ -120,14 +127,14 @@ int main() {
         model = glm::rotate(model, glm::radians(23.5f), glm::vec3(0.0f, 0.0f, 1.0f));
         model = glm::rotate(model, timeElapsed * 5.0f, glm::vec3(0.0f, 1.0f, 0.0f));
         model = glm::scale(model, glm::vec3(1.0f));
-        drawPlanet(shaderProgram, model, glm::vec3(0.2f, 0.5f, 0.9f), 0.0f); // No emission
+        drawPlanet(shaderProgram, model, earthTexture, 0.0f); // No emission
         
         // Moon
         model = earthOrbit;
         model = glm::rotate(model, timeElapsed * 7.0f, glm::vec3(0.0f, 1.0f, 0.0f));
         model = glm::translate(model, glm::vec3(2.5f, 0.0f, 0.0f));
         model = glm::scale(model, glm::vec3(0.3f));
-        drawPlanet(shaderProgram, model, glm::vec3(0.8f, 0.8f, 0.8f), 0.0f); // No emission
+        drawPlanet(shaderProgram, model, moonTexture, 0.0f); // No emission
 
         glUseProgram(orbitShaderProgram);
 

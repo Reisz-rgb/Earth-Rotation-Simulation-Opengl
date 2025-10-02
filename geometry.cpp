@@ -2,6 +2,7 @@
 #define _USE_MATH_DEFINES 
 #include <cmath>
 #include <iostream>
+#include "stb_image.h"
 
 Sphere sphere;
 
@@ -21,6 +22,9 @@ void createSphere(float radius, int sectors, int stacks) {
         xy = radius * cosf(stackAngle);
         z = radius * sinf(stackAngle);
         
+        // V coordinate (vertical): goes from 1.0 (top pole) to 0.0 (bottom pole)
+        float v = (float)i / (float)stacks; 
+        
         for(int j = 0; j <= sectors; ++j) {
             sectorAngle = j * sectorStep;
             
@@ -30,15 +34,21 @@ void createSphere(float radius, int sectors, int stacks) {
             sphere.vertices.push_back(y);
             sphere.vertices.push_back(z);
             
-            // Normals are the same as positions for a unit sphere centered at origin
+            // Normals
             nx = x / radius;
             ny = y / radius;
             nz = z / radius;
             sphere.vertices.push_back(nx);
             sphere.vertices.push_back(ny);
             sphere.vertices.push_back(nz);
+            
+            // U coordinate (horizontal): goes from 0.0 to 1.0
+            float u = (float)j / (float)sectors;
+            sphere.vertices.push_back(u); // <-- NEW UVs
+            sphere.vertices.push_back(v); // <-- NEW UVs
         }
     }
+
     
     // Index generation (triangles)
     for(int i = 0; i < stacks; ++i) {
@@ -78,19 +88,30 @@ void createSphere(float radius, int sectors, int stacks) {
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sphere.indices.size() * sizeof(unsigned int),
                  sphere.indices.data(), GL_STATIC_DRAW);
     
+    // Total stride is now 8 * sizeof(float) (3 pos + 3 normal + 2 tex)
+    const int stride = 8 * sizeof(float); 
+
     // Position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void*)0);
     glEnableVertexAttribArray(0);
     
     // Normal attribute
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
+
+    // Texture coordinate attribute
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, stride, (void*)(6 * sizeof(float)));
+    glEnableVertexAttribArray(2);
 }
 
-void drawPlanet(unsigned int shaderProgram, glm::mat4 model, glm::vec3 color, float emission) {
-    // Note: glBindVertexArray(sphere.VAO) should be called once per frame in the render loop before calling this function for the first time.
+void drawPlanet(unsigned int shaderProgram, glm::mat4 model, unsigned int textureID, float emission) {
+    // glBindVertexArray(sphere.VAO) should be called once per frame in the render loop before calling this function for the first time.
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
-    glUniform3fv(glGetUniformLocation(shaderProgram, "objectColor"), 1, glm::value_ptr(color));
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, textureID);
+    glUniform1i(glGetUniformLocation(shaderProgram, "planetTexture"), 0); 
+
+    //glUniform3fv(glGetUniformLocation(shaderProgram, "objectColor"), 1, glm::value_ptr(color));
     glUniform1f(glGetUniformLocation(shaderProgram, "emissionStrength"), emission);
     glDrawElements(GL_TRIANGLES, sphere.indexCount, GL_UNSIGNED_INT, 0);
 }
@@ -139,4 +160,43 @@ void drawOrbit(unsigned int shaderProgram, const Orbit& orbit, glm::mat4 model, 
     glBindVertexArray(orbit.VAO);
     glDrawArrays(GL_LINE_LOOP, 0, orbit.vertexCount);
     glBindVertexArray(0);
+}
+
+unsigned int loadTexture(const char* path) {
+    unsigned int textureID;
+    glGenTextures(1, &textureID);
+
+    int width, height, nrComponents;
+    unsigned char *data = stbi_load(path, &width, &height, &nrComponents, 0);
+
+    if (data) {
+       std::cout << "Successfully loaded texture: " << path 
+              << " (" << width << "x" << height << ", " 
+              << nrComponents << " components)" << std::endl;
+
+        GLenum format;
+       if (nrComponents == 1)
+            format = GL_RED;
+        else if (nrComponents == 3)
+            format = GL_RGB; 
+        else if (nrComponents == 4)
+            format = GL_RGBA;
+        
+        glBindTexture(GL_TEXTURE_2D, textureID);
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+
+        // Set wrapping and filtering parameters
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        stbi_image_free(data);
+    } else {
+        std::cout << "Texture failed to load at path: " << path << std::endl;
+        stbi_image_free(data); // Ensures memory is freed even on failure
+    }
+
+    return textureID;
 }
