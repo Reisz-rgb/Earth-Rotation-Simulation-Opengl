@@ -77,16 +77,3 @@ message(STATUS "=================================")
 
 # Installation rules
 install(TARGETS main DESTINATION bin)
-
-# Print instructions after build
-add_custom_command(TARGET main POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E echo ""
-    COMMAND ${CMAKE_COMMAND} -E echo "=== Build Complete ==="
-    COMMAND ${CMAKE_COMMAND} -E echo "Executable: ${CMAKE_BINARY_DIR}/bin/main"
-    COMMAND ${CMAKE_COMMAND} -E echo ""
-    COMMAND ${CMAKE_COMMAND} -E echo "Controls:"
-    COMMAND ${CMAKE_COMMAND} -E echo "  Mouse: Rotate camera"
-    COMMAND ${CMAKE_COMMAND} -E echo "  Scroll: Zoom in/out"
-    COMMAND ${CMAKE_COMMAND} -E echo "  ESC: Exit"
-    COMMAND ${CMAKE_COMMAND} -E echo ""
-)

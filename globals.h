@@ -42,5 +42,6 @@ struct Orbit {
 
 extern Orbit earthOrbitRing;
 extern Orbit moonOrbitRing;
+extern Orbit marsOrbitRing;
 
 #endif 

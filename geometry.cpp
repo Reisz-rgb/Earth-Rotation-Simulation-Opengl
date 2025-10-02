@@ -44,8 +44,8 @@ void createSphere(float radius, int sectors, int stacks) {
             
             // U coordinate (horizontal): goes from 0.0 to 1.0
             float u = (float)j / (float)sectors;
-            sphere.vertices.push_back(u); // <-- NEW UVs
-            sphere.vertices.push_back(v); // <-- NEW UVs
+            sphere.vertices.push_back(u);
+            sphere.vertices.push_back(v); 
         }
     }
 
@@ -118,6 +118,7 @@ void drawPlanet(unsigned int shaderProgram, glm::mat4 model, unsigned int textur
 
 Orbit earthOrbitRing;
 Orbit moonOrbitRing;
+Orbit marsOrbitRing;
 
 // Create orbit ring geometry
 void createOrbitRing(Orbit& orbit, float radius, int segments) {
@@ -195,7 +196,7 @@ unsigned int loadTexture(const char* path) {
         stbi_image_free(data);
     } else {
         std::cout << "Texture failed to load at path: " << path << std::endl;
-        stbi_image_free(data); // Ensures memory is freed even on failure
+        stbi_image_free(data); 
     }
 
     return textureID;

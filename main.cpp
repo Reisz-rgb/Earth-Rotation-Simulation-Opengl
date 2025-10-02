@@ -61,22 +61,17 @@ int main() {
     stbi_set_flip_vertically_on_load(true);
     unsigned int sunTexture = loadTexture("textures/sun.jpg");     
     unsigned int earthTexture = loadTexture("textures/earth.jpg"); 
-    unsigned int moonTexture = loadTexture("textures/moon.jpg");   
+    unsigned int moonTexture = loadTexture("textures/moon.jpg"); 
+    unsigned int marsTexture = loadTexture("textures/mars.jpg");   
     
     // Create sphere geometry
     createSphere(1.0f, 36, 18);
     
     // Create orbit rings 
-    const int ORBIT_SEGMENTS = 100;
+    const int ORBIT_SEGMENTS = 32;
     createOrbitRing(earthOrbitRing, 16.0f, ORBIT_SEGMENTS); 
-    createOrbitRing(moonOrbitRing, 2.5f, ORBIT_SEGMENTS);  
-
-    
-    std::cout << "=== Simulator ===" << std::endl;
-    std::cout << "\nControls:" << std::endl;
-    std::cout << "  Left Mouse + Drag: Rotate camera" << std::endl;
-    std::cout << "  Scroll Wheel: Zoom in/out" << std::endl;
-    std::cout << "  ESC: Exit" << std::endl << std::endl;
+    createOrbitRing(moonOrbitRing, 2.5f, ORBIT_SEGMENTS);
+    createOrbitRing(marsOrbitRing, 22.0f, ORBIT_SEGMENTS);   
     
     while(!glfwWindowShouldClose(window)) {
         // Timing
@@ -119,7 +114,7 @@ int main() {
         
         // Earth Orbit
         glm::mat4 earthOrbit = glm::mat4(1.0f);
-        earthOrbit = glm::rotate(earthOrbit, timeElapsed * 2.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+        earthOrbit = glm::rotate(earthOrbit, timeElapsed * 1.0f, glm::vec3(0.0f, 1.0f, 0.0f));
         earthOrbit = glm::translate(earthOrbit, glm::vec3(16.0f, 0.0f, 0.0f));
 
         // Earth
@@ -136,6 +131,18 @@ int main() {
         model = glm::scale(model, glm::vec3(0.3f));
         drawPlanet(shaderProgram, model, moonTexture, 0.0f); // No emission
 
+         // Mars Orbit
+        glm::mat4 marsOrbit = glm::mat4(1.0f);
+        marsOrbit = glm::rotate(marsOrbit, timeElapsed * 0.5f, glm::vec3(0.0f, 1.0f, 0.0f));
+        marsOrbit = glm::translate(marsOrbit, glm::vec3(22.0f, 0.0f, 0.0f));
+
+        // Mars
+        model = marsOrbit;
+        model = glm::rotate(model, glm::radians(23.5f), glm::vec3(0.0f, 0.0f, 1.0f));
+        model = glm::rotate(model, timeElapsed * 5.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(1.0f));
+        drawPlanet(shaderProgram, model, marsTexture, 0.0f); // No emission*/
+
         glUseProgram(orbitShaderProgram);
 
          // Set camera uniforms for the orbit shader
@@ -146,6 +153,8 @@ int main() {
         glm::mat4 orbitModel = glm::mat4(1.0f);
         drawOrbit(orbitShaderProgram, earthOrbitRing, orbitModel, glm::vec3(0.5f, 0.5f, 0.5f)); // Light gray
         drawOrbit(orbitShaderProgram, moonOrbitRing, earthOrbit, glm::vec3(0.3f, 0.3f, 0.3f)); // Darker gray
+        drawOrbit(orbitShaderProgram, marsOrbitRing, orbitModel, glm::vec3(0.3f, 0.3f, 0.3f)); // Darker gray
+
 
  
         glfwSwapBuffers(window);
