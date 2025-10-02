@@ -119,6 +119,7 @@ void drawPlanet(unsigned int shaderProgram, glm::mat4 model, unsigned int textur
 Orbit earthOrbitRing;
 Orbit moonOrbitRing;
 Orbit marsOrbitRing;
+Orbit mercuryOrbitRing;
 
 // Create orbit ring geometry
 void createOrbitRing(Orbit& orbit, float radius, int segments) {

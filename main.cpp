@@ -63,6 +63,7 @@ int main() {
     unsigned int earthTexture = loadTexture("textures/earth.jpg"); 
     unsigned int moonTexture = loadTexture("textures/moon.jpg"); 
     unsigned int marsTexture = loadTexture("textures/mars.jpg");   
+    unsigned int mercuryTexture = loadTexture("textures/mercury.jpg");
     
     // Create sphere geometry
     createSphere(1.0f, 36, 18);
@@ -71,7 +72,8 @@ int main() {
     const int ORBIT_SEGMENTS = 32;
     createOrbitRing(earthOrbitRing, 16.0f, ORBIT_SEGMENTS); 
     createOrbitRing(moonOrbitRing, 2.5f, ORBIT_SEGMENTS);
-    createOrbitRing(marsOrbitRing, 22.0f, ORBIT_SEGMENTS);   
+    createOrbitRing(marsOrbitRing, 22.0f, ORBIT_SEGMENTS);
+    createOrbitRing(mercuryOrbitRing, 10.0f, ORBIT_SEGMENTS);   
     
     while(!glfwWindowShouldClose(window)) {
         // Timing
@@ -111,7 +113,19 @@ int main() {
         model = glm::rotate(model, timeElapsed * 0.5f, glm::vec3(0.0f, 1.0f, 0.0f));
         model = glm::scale(model, glm::vec3(2.5f));
         drawPlanet(shaderProgram, model, sunTexture, 1.5f); // High emission
-        
+
+        // Mercury Orbit
+        glm::mat4 mercuryOrbit = glm::mat4(1.0f);
+        mercuryOrbit = glm::rotate(mercuryOrbit, timeElapsed * 1.5f, glm::vec3(0.0f, 1.0f, 0.0f));
+        mercuryOrbit = glm::translate(mercuryOrbit, glm::vec3(10.0f, 0.0f, 0.0f));
+
+        // Mercury
+        model = mercuryOrbit;
+        model = glm::rotate(model, glm::radians(23.5f), glm::vec3(0.0f, 0.0f, 1.0f));
+        model = glm::rotate(model, timeElapsed * 5.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(1.0f));
+        drawPlanet(shaderProgram, model, mercuryTexture, 0.0f); // No emission
+
         // Earth Orbit
         glm::mat4 earthOrbit = glm::mat4(1.0f);
         earthOrbit = glm::rotate(earthOrbit, timeElapsed * 1.0f, glm::vec3(0.0f, 1.0f, 0.0f));
@@ -154,8 +168,7 @@ int main() {
         drawOrbit(orbitShaderProgram, earthOrbitRing, orbitModel, glm::vec3(0.5f, 0.5f, 0.5f)); // Light gray
         drawOrbit(orbitShaderProgram, moonOrbitRing, earthOrbit, glm::vec3(0.3f, 0.3f, 0.3f)); // Darker gray
         drawOrbit(orbitShaderProgram, marsOrbitRing, orbitModel, glm::vec3(0.3f, 0.3f, 0.3f)); // Darker gray
-
-
+        drawOrbit(orbitShaderProgram, mercuryOrbitRing, orbitModel, glm::vec3(0.5f, 0.5f, 0.5f)); // Light gray
  
         glfwSwapBuffers(window);
         glfwPollEvents();
