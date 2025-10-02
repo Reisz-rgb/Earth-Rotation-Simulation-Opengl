@@ -163,8 +163,7 @@ int main() {
     glDeleteBuffers(1, &moonOrbitRing.VBO);
     
     glDeleteProgram(planetShaderProgram);
-    glDeleteProgram(orbitShaderProgram); // <-- Clean up new shader
-
+    glDeleteProgram(orbitShaderProgram); 
     glfwTerminate();
     return 0;
 }
